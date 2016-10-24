@@ -243,7 +243,11 @@ void OnInit(HWND hDlg)
 	
 	m_transition=-1; // start transition lock
 	m_hwndPage = hDlg;
-		
+	
+	hfont = (HFONT)GetStockObject(ANSI_FIXED_FONT);
+	if(hfont)
+		SendMessage(format_cb, WM_SETFONT, (WPARAM)hfont, 0);
+	
 	LinkControl_Setup(doc_lnk, LCF_SIMPLE|LCF_RELATIVE, L"T-Clock Help.rtf");
 	
 	// Fill and select the "Locale" combobox
