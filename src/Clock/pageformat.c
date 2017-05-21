@@ -234,7 +234,9 @@ void OnInit(HWND hDlg)
 	HWND locale_cb = GetDlgItem(hDlg, IDC_LOCALE);
 	HWND am_cb = GetDlgItem(hDlg, IDC_AMSYMBOL);
 	HWND pm_cb = GetDlgItem(hDlg, IDC_PMSYMBOL);
+	HDC hdc;
 	HFONT hfont;
+	LOGFONT lf;
 	wchar_t fmt[MAX_FORMAT];
 	int i, count;
 	wchar_t ampm_user[TNY_BUFF];
@@ -244,9 +246,14 @@ void OnInit(HWND hDlg)
 	m_transition=-1; // start transition lock
 	m_hwndPage = hDlg;
 	
-	hfont = (HFONT)GetStockObject(ANSI_FIXED_FONT);
-	if(hfont)
-		SendMessage(format_cb, WM_SETFONT, (WPARAM)hfont, 0);
+	hdc = GetDC(hDlg);
+	GetObject(GetStockObject(ANSI_FIXED_FONT), sizeof(lf), &lf);
+	lf.lfWidth = MulDiv(lf.lfWidth, GetDeviceCaps(hdc, LOGPIXELSX), 72);
+	lf.lfHeight = MulDiv(lf.lfHeight, GetDeviceCaps(hdc, LOGPIXELSY), 72);
+	hfont = (HFONT)CreateFontIndirect(&lf);
+	if (hfont)
+	SendMessage(format_cb, WM_SETFONT, (WPARAM)hfont, 0);
+	ReleaseDC(hDlg, hdc);
 	
 	LinkControl_Setup(doc_lnk, LCF_SIMPLE|LCF_RELATIVE, L"T-Clock Help.rtf");
 	
