@@ -68,7 +68,7 @@ void InitFormat(const wchar_t* section, SYSTEMTIME* lt)   //--------------------
 /*------------------------------------------------------------------------
 // Add Seconds to System Time
 //-----------------------------------------------------------------------*/
-void iAddSecondsToSystemTime(SYSTEMTIME* timeIn, double tfSeconds)
+void iAddSecondsToSystemTime(SYSTEMTIME* timeIn, long tfSeconds)
 {
 	FILETIME ft;
 
