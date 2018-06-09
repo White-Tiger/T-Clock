@@ -65,6 +65,23 @@ void InitFormat(const wchar_t* section, SYSTEMTIME* lt)   //--------------------
 		m_AltYear = _wtoi(year);
 }
 
+/*------------------------------------------------------------------------
+// Add Seconds to System Time
+//-----------------------------------------------------------------------*/
+void iAddSecondsToSystemTime(SYSTEMTIME* timeIn, double tfSeconds)
+{
+	FILETIME ft;
+
+	// Convert to filetime
+	SystemTimeToFileTime(timeIn, &ft);
+
+	// Add seconds
+	((ULARGE_INTEGER *)&ft)->QuadPart += (tfSeconds * 10000000LLU);
+
+	// Convert back to systemtime
+	FileTimeToSystemTime(&ft, timeIn);
+}
+
 __pragma(warning(push))
 __pragma(warning(disable:4701)) // MSVC is confused with our S(..) format (uptime) about "num" being "uninitialized"
 //================================================================================================
@@ -93,6 +110,22 @@ unsigned MakeFormat(wchar_t buf[FORMAT_MAX_SIZE], const wchar_t* fmt, SYSTEMTIME
 			out += api.WriteFormatNum(out, (int)pt->wSecond, 2, 0);
 			*out++ = '.';
 			out += api.WriteFormatNum(out, (int)pt->wMilliseconds, 3, 0);
+		}
+
+		// If we get an offset
+		else if (*fmt == 'o') {
+			int nOffsetMinutes = 0;
+			char is_negative = (*++fmt == '-');
+
+			for (; *++fmt <= '9' && *fmt >= '0'; ) {
+				nOffsetMinutes *= 10;
+				nOffsetMinutes += *fmt - '0';
+			}
+
+			if (is_negative)
+				nOffsetMinutes = -nOffsetMinutes;
+
+			iAddSecondsToSystemTime(pt, nOffsetMinutes * 60);
 		}
 		
 		else if(*fmt == 'y' && fmt[1] == 'y') {
