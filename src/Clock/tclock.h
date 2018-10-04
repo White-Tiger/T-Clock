@@ -180,6 +180,8 @@ typedef struct alarm_t {
 	int days;
 	int hour;
 	int minute;
+	int day;
+	int month;
 	int iTimes;
 	dlgmsg_t dlgmsg;
 	unsigned char uFlags;

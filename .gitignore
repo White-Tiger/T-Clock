@@ -50,3 +50,5 @@ T-Clock*.7z
 _*
 Static/
 *.[0-9].*
+/src/~ide/.vs/msvc-vs/v15
+/.vs

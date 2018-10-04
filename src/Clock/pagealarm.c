@@ -161,8 +161,13 @@ INT_PTR CALLBACK Page_Alarm(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPara
 				EnableDlgItem(hDlg, IDC_SPINTIMES, checked);
 			}
 			/* fall through */
+		case IDC_ALRM_ONCE: {
+			int i;
+			for (i = IDC_LABDATEALARM; i <= IDC_SPINMONTH; ++i)
+				EnableDlgItem(hDlg, i, IsDlgButtonChecked(hDlg, IDC_ALRM_ONCE));
+		}
+			/* fall through */
 		// checked other checkboxes
-		case IDC_ALRM_ONCE:
 		case IDC_REPEATJIHOU:
 		case IDC_BLINKALARM:
 		case IDC_BLINKJIHOU:
@@ -361,6 +366,8 @@ void GetAlarmFromDlg(HWND hDlg, alarm_t* pAS)   //------------------------------
 		pAS->hour = _12hTo24h(pAS->hour, IsDlgButtonChecked(hDlg,IDC_AMPM_CHECK));
 	pAS->minute = (int)SendDlgItemMessage(hDlg,IDC_SPINMINUTE,UDM_GETPOS32,0,0);
 	pAS->days = m_days;
+	pAS->day = (int)SendDlgItemMessage(hDlg,IDC_SPINDATE,UDM_GETPOS32,0,0);
+	pAS->month = (int)SendDlgItemMessage(hDlg,IDC_SPINMONTH,UDM_GETPOS32,0,0);
 	
 	GetDlgItemText(hDlg, IDC_FILEALARM, pAS->fname, MAX_PATH);
 	
@@ -375,6 +382,10 @@ void SetAlarmToDlg(HWND hDlg, alarm_t* pAS)   //--------------------------------
 	
 	SetDlgItemText(hDlg, IDC_COMBOALARM, pAS->dlgmsg.name);
 	
+	SendDlgItemMessage(hDlg, IDC_SPINMONTH, UDM_SETRANGE32, 1, 12);
+	SendDlgItemMessage(hDlg, IDC_SPINMONTH, UDM_SETPOS32, 0, pAS->month);
+	SendDlgItemMessage(hDlg, IDC_SPINDATE, UDM_SETRANGE32, 1, 31);
+	SendDlgItemMessage(hDlg, IDC_SPINDATE, UDM_SETPOS32, 0, pAS->day);
 	SendDlgItemMessage(hDlg, IDC_SPINMINUTE, UDM_SETRANGE32, 0,59);
 	SendDlgItemMessage(hDlg, IDC_SPINMINUTE, UDM_SETPOS32, 0, pAS->minute);
 	SendDlgItemMessage(hDlg, IDC_SPINTIMES, UDM_SETRANGE32, (WPARAM)-1,42);
@@ -524,7 +535,7 @@ void OnAlarmJihou(HWND hDlg, WORD id)
 	enabled = IsDlgButtonChecked(hDlg, id);
 	
 	if(id == IDC_ALARM) {
-		cstart = IDC_LABTIMEALARM; cend = IDC_MSG_ALARM;
+		cstart = IDC_LABTIMEALARM; cend = IDC_SPINMONTH;
 		if(enabled) {
 			int repeat=IsDlgButtonChecked(hDlg,IDC_REPEATALARM);
 			OnMsgAlarm(hDlg,IDC_MSG_ALARM);
@@ -540,6 +551,13 @@ void OnAlarmJihou(HWND hDlg, WORD id)
 	
 	for(i=cstart; i<=cend; ++i)
 		EnableDlgItem(hDlg, i, enabled);
+
+
+	if (id == IDC_ALARM && enabled && !IsDlgButtonChecked(hDlg, IDC_ALRM_ONCE)) {
+		cstart = IDC_LABDATEALARM;
+		for (i = cstart; i <= cend; ++i)
+			EnableDlgItem(hDlg, i, !enabled);
+	}
 	
 	if(id == IDC_ALARM){
 		OnFileChange(hDlg, IDC_FILEALARM);

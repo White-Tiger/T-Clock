@@ -288,6 +288,14 @@ time_t AlarmNextTimestamp() {
 	tm.tm_min = minute;
 	tm.tm_sec = 0;
 	
+
+	if (api.GetInt(g_alarmkey, L"Once", 0) && api.GetInt(g_alarmkey, L"Day", 0) && api.GetInt(g_alarmkey, L"Month", 0)) {
+		int month = api.GetInt(g_alarmkey, L"Month", 0) - 1;
+		if (tm.tm_mon > month) ++tm.tm_year;
+		tm.tm_mday = api.GetInt(g_alarmkey, L"Day", 0);
+		tm.tm_mon = month;
+	}
+
 	return mktime(&tm);
 }
 void ReadAlarmFromReg(alarm_t* pAS, int idx)
@@ -298,6 +306,8 @@ void ReadAlarmFromReg(alarm_t* pAS, int idx)
 	
 	pAS->hour = api.GetInt(g_alarmkey, L"Hour", 12) % 24;
 	pAS->minute = api.GetInt(g_alarmkey, L"Minute", 0);
+	pAS->day = api.GetInt(g_alarmkey, L"Day", 0);
+	pAS->month = api.GetInt(g_alarmkey, L"Month", 0);
 	pAS->days = api.GetInt(g_alarmkey, L"Days", 0);
 	pAS->iTimes = api.GetInt(g_alarmkey, L"Times", 1);
 	
@@ -323,6 +333,8 @@ void SaveAlarmToReg(alarm_t* pAS, int idx)
 	api.SetStr(g_alarmkey, L"Name", pAS->dlgmsg.name);
 	api.SetInt(g_alarmkey, L"Hour", pAS->hour);
 	api.SetInt(g_alarmkey, L"Minute", pAS->minute);
+	api.SetInt(g_alarmkey, L"Day", pAS->day);
+	api.SetInt(g_alarmkey, L"Month", pAS->month);
 	if(pAS->fname[0] == '<')
 		pAS->fname[0] = '\0';
 	api.SetStr(g_alarmkey, L"File", pAS->fname);
