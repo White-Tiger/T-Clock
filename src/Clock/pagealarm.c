@@ -161,9 +161,11 @@ INT_PTR CALLBACK Page_Alarm(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPara
 				EnableDlgItem(hDlg, IDC_SPINTIMES, checked);
 			}
 			/* fall through */
-		case IDC_ALRM_ONCE:
-			for (int i = IDC_LABDATEALARM; i <= IDC_SPINMONTH; ++i)
+		case IDC_ALRM_ONCE: {
+			int i;
+			for (i = IDC_LABDATEALARM; i <= IDC_SPINMONTH; ++i)
 				EnableDlgItem(hDlg, i, IsDlgButtonChecked(hDlg, IDC_ALRM_ONCE));
+		}
 			/* fall through */
 		// checked other checkboxes
 		case IDC_REPEATJIHOU:
