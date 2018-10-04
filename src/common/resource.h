@@ -316,7 +316,7 @@
 #define IDC_COMBOALARM                  1290
 #define IDC_DELALARM                    1291
 #define IDC_ALARM                       1300
-#define IDC_LABTIMEALARM                1301 /* group */
+#define IDC_LABTIMEALARM                1301/* group */
 #define IDC_LABTIMEALARM_X              1302
 #define IDC_HOURALARM                   1303
 #define IDC_SPINHOUR                    1304
@@ -338,8 +338,14 @@
 #define IDC_REPEATIMES                  1320 /* group_2 */
 #define IDC_SPINTIMES                   1321 /* end group_2 */
 #define IDC_ALRM_ONCE                   1322
-#define IDC_MSG_ALARM                   1323 /* end group */
-#define IDC_BMPJACK                     1326
+#define IDC_MSG_ALARM                   1323
+#define IDC_LABDATEALARM                1324 /* group_3 */
+#define IDC_DATEALARM                   1325
+#define IDC_SPINDATE                    1326
+#define IDC_LABMONTHALARM               1327
+#define IDC_MONTHALARM                  1328 
+#define IDC_SPINMONTH                   1329 /* end group *//* end group_3*/
+#define IDC_BMPJACK                     1360
 #define IDC_JIHOU                       1330
 #define IDC_LABSOUNDJIHOU               1331 /* group */
 #define IDC_FILEJIHOU                   1332 /* group_1 */
