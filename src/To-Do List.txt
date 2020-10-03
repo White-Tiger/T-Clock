@@ -9,6 +9,8 @@ Add TClockEx Feature: ZZ = 3 character TimeZone Code in Custom Format String.
 
 NEED TO ADD: CommandLine /Switch Option to Mouse Click Run App X Feature.
 
+Fix Bugs And Add Support For Newer Windows 10 Builds
+
 Requests: From DC Member: freaky44
 - It would be great to have the option to see the size and number of files of
   the recycle bin in the Mouse-over Tooltip Text. (e.g. "10 Files, 135 MB").
@@ -115,7 +117,7 @@ DONE - Fix Context Menu Dismissal Focus Issue
 
 DONE - Find Out Why ToolTip is Bashful (Never Shows the Second Time)
 
-DONE - Need to resolve the focus issue – double click action not firing on first run anymore.
+DONE - Need to resolve the focus issue â€“ double click action not firing on first run anymore.
 		This is tied to the context menu dismissal bugg (TRUE ...All 3 Buggs Fell Together!).
 
 DONE - NEED TO Restrict Stopwatch Dialog to Single Instance (Evil Psychotic Twin Issue).
