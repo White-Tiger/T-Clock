@@ -75,7 +75,10 @@ unsigned MakeFormat(wchar_t buf[FORMAT_MAX_SIZE], const wchar_t* fmt, SYSTEMTIME
 	const wchar_t* pos;
 	wchar_t* out = buf;
 	ULONGLONG TickCount = 0;
-	
+	//used to adjust the time in the case of a fractional 'w' timezone modifier
+	int minute = 0;
+	int hour = pt->wHour;
+
 	while(*fmt) {
 		if(*fmt == '"') {
 			for(++fmt; *fmt&&*fmt!='"'; )
@@ -102,6 +105,7 @@ unsigned MakeFormat(wchar_t buf[FORMAT_MAX_SIZE], const wchar_t* fmt, SYSTEMTIME
 			
 			out += api.WriteFormatNum(out, (len==2)?(int)pt->wYear%100:(int)pt->wYear, len, 0);
 			fmt += len;
+			hour = pt->wHour;
 		} else if(*fmt == 'm') {
 			if(*(fmt + 1) == 'm' && *(fmt + 2) == 'e') {
 				*out++ = m_MonthEng[pt->wMonth-1][0];
@@ -127,6 +131,7 @@ unsigned MakeFormat(wchar_t buf[FORMAT_MAX_SIZE], const wchar_t* fmt, SYSTEMTIME
 				}
 				*out++ = (wchar_t)((int)pt->wMonth % 10) + '0';
 			}
+			hour = pt->wHour;
 		} else if(*fmt == 'a' && fmt[1] == 'a' && fmt[2] == 'a') {
 			fmt += 3;
 			if(*fmt == 'a') {
@@ -136,6 +141,7 @@ unsigned MakeFormat(wchar_t buf[FORMAT_MAX_SIZE], const wchar_t* fmt, SYSTEMTIME
 				pos = m_DayOfWeekShort;
 			}
 			for(; *pos; *out++ = *pos++);
+			hour = pt->wHour;
 		} else if(*fmt=='d') {
 			if(fmt[1]=='d' && fmt[2]=='e'){
 				fmt+=3;
@@ -160,8 +166,10 @@ unsigned MakeFormat(wchar_t buf[FORMAT_MAX_SIZE], const wchar_t* fmt, SYSTEMTIME
 				}
 				*out++ = (wchar_t)((int)pt->wDay % 10) + '0';
 			}
+			hour = pt->wHour;
 		} else if(*fmt=='h') {
-			int hour = pt->wHour;
+			minute = 0; //once we hit this, reset the timezone minute adjustment
+			hour = pt->wHour;
 			while(hour >= 12) // faster than mod 12 if "hour" <= 24
 				hour -= 12;
 			if(!hour && !g_bHourZero)
@@ -175,27 +183,53 @@ unsigned MakeFormat(wchar_t buf[FORMAT_MAX_SIZE], const wchar_t* fmt, SYSTEMTIME
 					*out++ = (wchar_t)(hour / 10) + '0';
 			}
 			*out++ = (wchar_t)(hour % 10) + '0';
+			hour = pt->wHour;
 		} else if(*fmt=='H') {
+			minute = 0; //once we hit this, reset the timezone minute adjustment
+			hour = pt->wHour;
 			if(fmt[1] == 'H') {
 				fmt += 2;
-				*out++ = (wchar_t)(pt->wHour / 10) + '0';
+				*out++ = (wchar_t)(hour / 10) + '0';
 			} else {
 				++fmt;
-				if(pt->wHour > 9)
-					*out++ = (wchar_t)(pt->wHour / 10) + '0';
+				if(hour > 9)
+					*out++ = (wchar_t)(hour / 10) + '0';
 			}
-			*out++ = (wchar_t)(pt->wHour % 10) + '0';
+			*out++ = (wchar_t)(hour % 10) + '0';
 		} else if((*fmt=='w'||*fmt=='W') && (fmt[1]=='+'||fmt[1]=='-')) {
 			char is_12h = (*fmt == 'w');
 			char is_negative = (*++fmt == '-');
-			int hour = 0;
-			for(; *++fmt<='9'&&*fmt>='0'; ){
-				hour *= 10;
-				hour += *fmt-'0';
+			minute = 0;
+			hour = 0;
+			float frac = 0;
+			for(; ((*++fmt >= '0' && *fmt<='9') || *fmt=='.'); ){
+				if (*fmt == '.')
+				{
+					frac = 0.1;
+				}
+				else if(frac==0)
+				{
+					//no fractional part yet
+					hour *= 10;
+					hour += *fmt - '0';
+				}
+				else 
+				{
+					//there's a fractional part
+					minute += frac * (*fmt - '0') * 60;
+					frac *= frac;
+				}
 			}
-			if(is_negative) hour = -hour;
+			if (is_negative)
+			{
+				minute = -minute;
+				//adjust hour backwards if timezone minute would go negative
+				if (((int)pt->wMinute + minute) < 0) hour++;
+				hour = -hour;
+			}
 			hour = (pt->wHour + hour)%24;
 			if(hour < 0) hour += 24;
+			int adjhour = hour;
 			if(is_12h){
 				while(hour >= 12) // faster than mod 12 if "hour" <= 24
 					hour -= 12;
@@ -204,17 +238,24 @@ unsigned MakeFormat(wchar_t buf[FORMAT_MAX_SIZE], const wchar_t* fmt, SYSTEMTIME
 			}
 			*out++ = (wchar_t)(hour / 10) + '0';
 			*out++ = (wchar_t)(hour % 10) + '0';
+			hour = adjhour;
 		} else if(*fmt == 'n') {
+			//adjust for timezone minute offset if any
+			minute = minute + (int)pt->wMinute;
+			//if minute went negative, make it positive
+			if (minute < 0) minute += 60;
+			minute = minute % 60;
 			if(fmt[1] == 'n') {
 				fmt += 2;
-				*out++ = (wchar_t)((int)pt->wMinute / 10) + '0';
+				*out++ = (wchar_t)(minute / 10) + '0';
 			} else {
 				++fmt;
-				if(pt->wMinute > 9)
-					*out++ = (wchar_t)((int)pt->wMinute / 10) + '0';
+				if(minute > 9)
+					*out++ = (wchar_t)(minute / 10) + '0';
 			}
-			*out++ = (wchar_t)((int)pt->wMinute % 10) + '0';
+			*out++ = (wchar_t)(minute % 10) + '0';
 		} else if(*fmt == 's') {
+			minute = 0; //once we hit this, reset the timezone minute adjustment
 			if(fmt[1] == 's') {
 				fmt += 2;
 				*out++ = (wchar_t)((int)pt->wSecond / 10) + '0';
@@ -225,25 +266,31 @@ unsigned MakeFormat(wchar_t buf[FORMAT_MAX_SIZE], const wchar_t* fmt, SYSTEMTIME
 			}
 			*out++ = (wchar_t)((int)pt->wSecond % 10) + '0';
 		} else if(*fmt == 't' && fmt[1] == 't') {
+			minute = 0; //once we hit this, reset the timezone minute adjustment
 			fmt += 2;
-			if(pt->wHour < 12) pos = m_AM; else pos = m_PM;
+			if(hour < 12) pos = m_AM; else pos = m_PM;
 			while(*pos) *out++ = *pos++;
+			hour = pt->wHour;
 		} else if(*fmt == 'A' && fmt[1] == 'M') {
+			minute = 0; //once we hit this, reset the timezone minute adjustment
 			if(fmt[2] == '/' &&
 			   fmt[3] == 'P' && fmt[4] == 'M') {
-				if(pt->wHour < 12) *out++ = 'A'; //--+++--> 2010 - Noon / MidNight Decided Here!
+				if(hour < 12) *out++ = 'A'; //--+++--> 2010 - Noon / MidNight Decided Here!
 				else *out++ = 'P';
 				*out++ = 'M'; fmt += 5;
 			} else if(fmt[2] == 'P' && fmt[3] == 'M') {
 				fmt += 4;
-				if(pt->wHour < 12) pos = m_AM; else pos = m_PM;
+				if(hour < 12) pos = m_AM; else pos = m_PM;
 				while(*pos) *out++ = *pos++;
 			} else *out++ = *fmt++;
+			hour = pt->wHour;
 		} else if(*fmt == 'a' && fmt[1] == 'm' && fmt[2] == '/' &&
 				  fmt[3] == 'p' && fmt[4] == 'm') {
-			if(pt->wHour < 12) *out++ = 'a';
+			minute = 0; //once we hit this, reset the timezone minute adjustment
+			if(hour < 12) *out++ = 'a';
 			else *out++ = 'p';
 			*out++ = 'm'; fmt += 5;
+			hour = pt->wHour;
 		}
 		// internet time
 		else if(*fmt == '@' && fmt[1] == '@' && fmt[2] == '@') {
@@ -261,6 +308,7 @@ unsigned MakeFormat(wchar_t buf[FORMAT_MAX_SIZE], const wchar_t* fmt, SYSTEMTIME
 					*out++ = (wchar_t)((beat100 % 10)) + '0';
 				}
 			}
+			hour = pt->wHour;
 		}
 		// alternate calendar
 		else if(*fmt == 'Y' && m_AltYear > -1) {
@@ -301,6 +349,7 @@ unsigned MakeFormat(wchar_t buf[FORMAT_MAX_SIZE], const wchar_t* fmt, SYSTEMTIME
 						  0, pt, NULL, out, (int)(bufend-out));
 			for(; *out; ++out);
 			fmt += 4;
+			hour = pt->wHour;
 		} else if(*fmt == 'S') { // uptime
 			int width, padding, num;
 			const wchar_t* old_fmt = ++fmt;
@@ -342,6 +391,7 @@ unsigned MakeFormat(wchar_t buf[FORMAT_MAX_SIZE], const wchar_t* fmt, SYSTEMTIME
 			}
 			if(specifier)
 				out += api.WriteFormatNum(out, num, width, padding);
+			hour = pt->wHour;
 		} else if(fmt[0] == 'w') { // numeric Day-of-Week
 			int weekday = pt->wDayOfWeek;
 			++fmt;
@@ -353,6 +403,7 @@ unsigned MakeFormat(wchar_t buf[FORMAT_MAX_SIZE], const wchar_t* fmt, SYSTEMTIME
 			} else {
 				*out++ = 'w';
 			}
+			hour = pt->wHour;
 		} else if(*fmt == 'W') { // Week-of-Year
 			char buf[4];
 			int width, padding, num;
@@ -399,16 +450,20 @@ unsigned MakeFormat(wchar_t buf[FORMAT_MAX_SIZE], const wchar_t* fmt, SYSTEMTIME
 					break;
 				}
 				num = week;
+				hour = pt->wHour;
 				break;}
 			case 'u': // U.S. like Week-of-Year - beginning on first day of the year, based on sunday
 				num = (1 + (tmnow.tm_yday + 6 - tmnow.tm_wday) / 7);
+				hour = pt->wHour;
 				break;
 			case 'w': // SWN (Simple Week Number)
 				num = (1 + tmnow.tm_yday / 7);
+				hour = pt->wHour;
 				break;
 			default:
 				specifier = '\0';
 				*out++ = 'W';
+				hour = pt->wHour;
 			}
 			if(specifier) {
 				++fmt;
@@ -453,6 +508,7 @@ unsigned MakeFormat(wchar_t buf[FORMAT_MAX_SIZE], const wchar_t* fmt, SYSTEMTIME
 				}
 			}
 			fmt +=2;
+			hour = pt->wHour;
 		}
 //================================================================================================
 //======================================= ORDINAL DATE Code =======================================
@@ -463,6 +519,7 @@ unsigned MakeFormat(wchar_t buf[FORMAT_MAX_SIZE], const wchar_t* fmt, SYSTEMTIME
 			gmtime_r(&UTC, &today);
 			out += wcsftime(out, 16, L"%Y-%j", &today);
 			fmt +=2;
+			hour = pt->wHour;
 		}
 		//==========================================================================
 		else if(*fmt == 'O' && *(fmt + 1) == 'd') { //------+++--> Ordinal Date Local:
@@ -472,6 +529,7 @@ unsigned MakeFormat(wchar_t buf[FORMAT_MAX_SIZE], const wchar_t* fmt, SYSTEMTIME
 			localtime_r(&ts, &today);
 			out += wcsftime(out, 16, L"%Y-%j", &today);
 			fmt +=2;
+			hour = pt->wHour;
 		}
 		//==========================================================================
 		else if(*fmt == 'D' && wcsncmp(fmt, L"DOY", 3) == 0) { //--+++--> Day-Of-Year:
@@ -481,11 +539,13 @@ unsigned MakeFormat(wchar_t buf[FORMAT_MAX_SIZE], const wchar_t* fmt, SYSTEMTIME
 			localtime_r(&ts, &today);
 			out += wcsftime(out, 8, L"%j", &today);
 			fmt +=3;
+			hour = pt->wHour;
 		}
 		//==========================================================================
 		else if(*fmt == 'P' && wcsncmp(fmt, L"POSIX", 5) == 0) { //-> Posix/Unix Time:
 			out += wsprintf(out, FMT("%") FMT(PRIi64), (int64_t)time(NULL));
 			fmt +=5;
+			hour = pt->wHour;
 		}
 		//==========================================================================
 		else if(*fmt == 'T' && wcsncmp(fmt, L"TZN", 3) == 0) { //--++-> TimeZone Name:
@@ -506,6 +566,7 @@ unsigned MakeFormat(wchar_t buf[FORMAT_MAX_SIZE], const wchar_t* fmt, SYSTEMTIME
 			while(*tzn) *out++ = *tzn++;
 			#endif
 			fmt +=3;
+			hour = pt->wHour;
 		}
 //=================================================================================================
 		else {

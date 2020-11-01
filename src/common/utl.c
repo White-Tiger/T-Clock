@@ -504,18 +504,18 @@ void DebugLog(int indent, const char* format, ...) {
 		va_end(args);
 		fputc('\n', s_log->fp);
 	}
-	fflush(s_log->fp);
+	//fflush(s_log->fp);
 }
 void DebugLogFree() {
 	if(s_log == kLogDisabled)
 		s_log = NULL;
 	if(s_log_share) {
-		if(s_log) {
-			if(s_log->fp)
-				fclose(s_log->fp), s_log->fp = NULL;
-			UnmapViewOfFile(s_log), s_log = NULL;
-		}
-		CloseHandle(s_log_share), s_log_share = NULL;
+		//if(s_log) {
+		//	if(s_log->fp)
+		//		fclose(s_log->fp), s_log->fp = NULL;
+		//	UnmapViewOfFile(s_log), s_log = NULL;
+		//}
+		//CloseHandle(s_log_share), s_log_share = NULL;
 	}
 }
 #endif // LOGGING
