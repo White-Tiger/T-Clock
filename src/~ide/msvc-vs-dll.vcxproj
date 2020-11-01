@@ -72,11 +72,15 @@
     <ClInclude Include="..\common\utl.h" />
     <ClInclude Include="..\common\utl_logging.h" />
     <ClInclude Include="..\common\win2k_compat.h" />
+    <ClInclude Include="..\DLL\resource.h" />
     <ClInclude Include="..\DLL\tcdll.h" />
     <ClInclude Include="..\DLL\clock_internal.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Condition="'$(Platform)'=='Win32'" Include="..\DLL\version.rc" />
     <ResourceCompile Condition="'$(Platform)'=='x64'" Include="..\DLL\version64.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\Clock\Clock.ico" />
   </ItemGroup>
 </Project>

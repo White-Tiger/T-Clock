@@ -37,6 +37,7 @@ _ReSharper*/
 */Win32/Release/
 */x64/Debug/
 */x64/Release/
+src/~ide/
 */cov-int
 T-Clock*.zip
 T-Clock*.7z

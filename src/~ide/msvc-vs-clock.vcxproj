@@ -81,6 +81,7 @@
     <ClCompile Include="..\common\win2k_compat.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\Clock\resource.h" />
     <ClInclude Include="..\common\version.h" />
     <ClInclude Include="..\common\resource.h" />
     <ClInclude Include="..\common\globals.h" />
