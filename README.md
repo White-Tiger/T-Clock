@@ -62,6 +62,11 @@ If you don't mind to read lots of text, and want to know more about T-Clock and 
 ### Requirements
 * Windows 2000+ *(up to Windows 10 as of 2014)*
 
+### Installation and Using the App
+* Just download the relevant package, unzip if needed, find the EXE file and double-click to start.
+* First time, you will see a configuration box "T-Clock Options". Make the needed changes, close the box when done.
+* Right-click on the clock on the system tray and enjoy...
+
 ### What's that `_vc2010` build?
 * As of 2018, all new releases will be build with GCC instead of the Visual C++ 2010 compiler.
   So the previously known `_static` builds are used instead and for compatibility reasons,
