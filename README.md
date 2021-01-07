@@ -64,7 +64,7 @@ If you don't mind to read lots of text, and want to know more about T-Clock and 
 
 ### Installation and Using the App
 * Just download the relevant package, unzip if needed, find the EXE file and double-click to start.
-* First time, you will see a configuration box "T-Clock Options". Make the needed changes, close the box when doen.
+* First time, you will see a configuration box "T-Clock Options". Make the needed changes, close the box when done.
 * Right-click on the clock on the system tray and enjoy...
 
 ### What's that `_vc2010` build?
