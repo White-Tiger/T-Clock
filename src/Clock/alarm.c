@@ -162,6 +162,31 @@ int PlayWave(HWND hwnd, const wchar_t* fname, DWORD dwLoops);
 int PlayMCI(HWND hwnd, int nt);
 void StopWave(void);
 
+/** Next local hh:00. UTC hour alignment rings at :30 in UTC+5:30 zones. */
+static time_t NextLocalHour(time_t now) {
+	struct tm local;
+	time_t boundary;
+	time_t adjusted = now - 1;
+	
+	if(adjusted < 0)
+		return now + 3600;
+	if(!localtime_r(&now, &local))
+		return adjusted + (3600 - (adjusted % 3600));
+	local.tm_min = 0;
+	local.tm_sec = 0;
+	local.tm_isdst = -1;
+	boundary = mktime(&local);
+	if(boundary == (time_t)-1)
+		return adjusted + (3600 - (adjusted % 3600));
+	if(boundary < now) {
+		local.tm_hour += 1;
+		local.tm_isdst = -1;
+		boundary = mktime(&local);
+		if(boundary == (time_t)-1)
+			boundary = now + 3600;
+	}
+	return boundary;
+}
 void AlarmChimeEnable(int enable) {
 	if(enable < 0) {
 		int status = api.GetInt(L"", L"Jihou", 0);
@@ -176,8 +201,7 @@ update_and_continue:
 	}
 	if(enable) {
 		unsigned data = 0;
-		time_t ts = time(NULL) - 1;
-		ts += 3600 - (ts % 3600);
+		time_t ts = NextLocalHour(time(NULL));
 		if(api.GetInt(L"", L"JihouRepeat", 0))
 			data |= ALRM_CHIMEHR;
 		if(api.GetInt(L"", L"JihouBlink", 0))
@@ -449,7 +473,7 @@ void OnTimerAlarm(HWND hwnd, time_t time)   // 12am = Midnight -----------------
 						}
 						PlayFile(hwnd, fname_u1, repeat_u1);
 					}
-					schedule->time += 3600;
+					schedule->time = NextLocalHour(schedule->time + 1);
 					break;
 				case SCHEDID_UPDATE:
 					if(!api.GetInt(NULL, UPDATE_RELEASE, 1)) {
