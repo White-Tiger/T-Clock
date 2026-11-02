@@ -17,6 +17,16 @@ static int m_AltYear;
 
 extern char g_bHourZero;
 
+/** 12-hour hour. "Show 12:xx as 0:xx" affects midnight only; noon stays 12. */
+static int ToHour12(int hour24) {
+	int hour = hour24;
+	while(hour >= 12) // faster than mod 12 if "hour" <= 24
+		hour -= 12;
+	if(!hour && (!g_bHourZero || hour24 >= 12))
+		hour = 12;
+	return hour;
+}
+
 //================================================================================================
 //---------------------------------//+++--> load Localized Strings for Month, Day, & AM/PM Symbols:
 void InitFormat(const wchar_t* section, SYSTEMTIME* lt)   //--------------------------------------------------------+++-->
@@ -161,11 +171,7 @@ unsigned MakeFormat(wchar_t buf[FORMAT_MAX_SIZE], const wchar_t* fmt, SYSTEMTIME
 				*out++ = (wchar_t)((int)pt->wDay % 10) + '0';
 			}
 		} else if(*fmt=='h') {
-			int hour = pt->wHour;
-			while(hour >= 12) // faster than mod 12 if "hour" <= 24
-				hour -= 12;
-			if(!hour && !g_bHourZero)
-				hour = 12;
+			int hour = ToHour12(pt->wHour);
 			if(fmt[1] == 'h') {
 				fmt += 2;
 				*out++ = (wchar_t)(hour / 10) + '0';
@@ -196,12 +202,8 @@ unsigned MakeFormat(wchar_t buf[FORMAT_MAX_SIZE], const wchar_t* fmt, SYSTEMTIME
 			if(is_negative) hour = -hour;
 			hour = (pt->wHour + hour)%24;
 			if(hour < 0) hour += 24;
-			if(is_12h){
-				while(hour >= 12) // faster than mod 12 if "hour" <= 24
-					hour -= 12;
-				if(!hour && !g_bHourZero)
-					hour = 12;
-			}
+			if(is_12h)
+				hour = ToHour12(hour);
 			*out++ = (wchar_t)(hour / 10) + '0';
 			*out++ = (wchar_t)(hour % 10) + '0';
 		} else if(*fmt == 'n') {
