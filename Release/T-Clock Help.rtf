@@ -1,70 +1,161 @@
-{\rtf1\ansi\ansicpg1252\deff0\nouicompat\deflang1033\deflangfe1033{\fonttbl{\f0\fswiss\fprq2\fcharset0 Arial;}}
-{\colortbl ;\red0\green0\blue255;}
-{\*\generator Riched20 10.0.16299}{\*\mmathPr\mdispDef1\mwrapIndent1440 }\viewkind4\uc1 
-\pard\widctlpar\sa200\sl276\slmult1\qc\b\f0\fs28 T-Clock Advanced Clock Configuration Options\par
-\fs24\par
-Date Options\par
+{\rtf1\ansi\ansicpg1252\deff0\deflang1033
+{\fonttbl{\f0\fswiss\fcharset0 Arial;}}
+{\colortbl;\red0\green0\blue255;}
+\viewkind4\uc1\pard\f0\fs22
 
-\pard\widctlpar\sa200\sl276\slmult1 Day of Week\b0\fs22\line dddd\tab = Text Weekday Long (by locale/can also use \b aaaa\b0 ) \line ddd\tab = Text Weekday Short (by locale/can also use \b aaa\b0 )\line dde\tab = Abbreviated weekday name in English.\line wi\tab = numeric weekday (ISO) from 1 - 7 (Monday - Sunday)\line wu\tab = numeric weekday (U.S.) from 0 - 6 (Sunday - Saturday)\b\fs24\par
-Day of Month\b0\fs22\line dd\tab = Numeric Day of Month (with leading 0) \line d\tab = Numeric Day of Month\par
-\b\fs24 Month of Year\b0\fs22\line mmmm = Text Month Long (by locale)\line mmm\tab   = Text Month Short (by locale)\line mme\tab   = Abbreviated month name in English.\line mm\tab   = Numeric Month of Year (with leading 0) \line m\tab   = Numeric Month of Year\par
-\b\fs24 Year\b0\fs22\line yyyy\tab = Four Digit Year\line yy\tab = Two Digit Year\line Y\tab = Year by the locale calendar (i.e. the year of the Emperor in Japan)\line ggg\tab = Period/era name by the locale calendar (i.e. \ldblquote Heisei\rdblquote  in Japan) \par
-\b\fs24 Week of Year\b0\fs22\line Wi\tab = ISO 8601 numeric Week-of-Year. (Europe)\line Wu\tab = U.S. like Week-of-Year \endash  beginning on first day of the year, based on sunday\line Ws\tab = numeric Week-of-Year \endash  beginning on first sunday.\line Wm\tab = numeric Week-of-Year \endash  beginning on first monday.\line Ww\tab = SWN (Simple-Week-Number) numeric Week-of-Year. \par
-\b\fs24 Day of Year\b0\fs22\line DOY\tab = Day of Year in decimal format (001 \endash  366).\par
-\b\fs24 Time Zone Name\b0\fs22\line TZN\tab = Name of the machine\rquote s currently configured Time Zone.\line\tab    \b\fs20 Note: \b0 For this to display correctly T-Clock will need to be restarted if Time Zone\line\tab\tab information is changed in Windows Date and Time Properties.\line\tab    \b Note: \b0 doesn't work currently, fixes or suggestions on how to name timezones are\line\tab\tab welcome.\fs22\par
-\par
+\pard\qc\sb0\sa80\b\fs32 T-Clock Help\par
+\pard\qc\sa240\b0\fs22 Format codes, command line, and PC beep tones.\par
 
-\pard\widctlpar\sa200\sl276\slmult1\qc\page\b\fs24 Time Options\b0\fs22\par
+\pard\sb280\sa100\b\fs28 Date options\par
 
-\pard\widctlpar\sl276\slmult1\b\fs24 Hours\line\b0\fs22 hh\tab = Hour in 12h format with leading 0\line h\tab = Hour in 12h format\line HH\tab = Hour in 24h format with leading 0\line H\tab = Hour in 24h format\line w \'b1 offset\tab = Alternate time zone in 12h format \endash  local time \'b1 offset\line W \'b1 offset\tab = Alternate time zone in 24h format\line\tab    offset is whole hours (\b W+13\b0 ), hours and minutes (\b W+5:30\b0  / \b W-3:30\b0 ), or decimal hours (\b W+5.5\b0  = 5 hours 30 minutes, \b W+5.75\b0  = 5 hours 45 minutes).\line\tab    The code prints that zone's hour. Later time and date codes (\b nn\b0 , \b ss\b0 , \b dd\b0 , \b mm\b0 , \b yyyy\b0 , \b tt\b0 , \b dddd\b0 , ...) stay on that zone, so the date changes when the offset crosses midnight. Another \b W\b0 /\b w\b0  offset starts a new zone from local time.\line\tab    \b W+5:30:\ldblquote yyyy-mm-dd HH:nn\rdblquote \b0  formats only the quoted text in that zone. Use this for a full second clock, including a 30- or 45-minute zone (India, Newfoundland, Nepal).\line\fs24\tab    \b\fs20 Example: \b0 \b UTC -5\b0  with \b w+05\b0  is UTC. \b W+10:30:\ldblquote HH:nn\rdblquote \b0  is India. \b W+13:\ldblquote yyyy-mm-dd HH:nn\rdblquote \b0  is China, and shows the next date after 11:00.\line\tab    \b UTC +2\b0  with \b w-02\b0  is UTC. Half-hour zones can also be written \b W+5:30:nn\b0  (hour, then that zone's minutes).\fs22\par
-\b\fs24 Minutes\b0\fs22\line nn\tab = Current Minutes with leading 0\line n\tab = Current Minutes\b\par
-\fs24 Seconds\b0\fs22\line ss\tab = Current Seconds with leading 0\line s\tab = Current Seconds\par
-\b\fs24 AM/PM\b0\fs22\line tt\tab = Add AM/PM Symbol as Configured in T-Clock Time Options (can also use \b am/pm\b0 )\b\par
-\fs24\page\par
+\pard\sb160\sa60\b\fs24 Day of week\par
+\pard\sa40\b0\fs22
+\b dddd\b0\tab Weekday, long (by locale; \b aaaa\b0 is the same)\par
+\b ddd\b0\tab Weekday, short (by locale; \b aaa\b0 is the same)\par
+\b dde\b0\tab Abbreviated weekday name in English\par
+\b wi\b0\tab Weekday number, ISO, 1 to 7 (Monday to Sunday)\par
+\b wu\b0\tab Weekday number, U.S., 0 to 6 (Sunday to Saturday)\par
 
-\pard\widctlpar\sa200\sl276\slmult1\qc Other Options\par
-\par
+\pard\sb160\sa60\b\fs24 Day of month\par
+\pard\sa40\b0\fs22
+\b dd\b0\tab Day of month, with a leading zero\par
+\b d\b0\tab Day of month\par
 
-\pard\widctlpar\sa200\sl276\slmult1 Swatch Internet Time \b0 a.k.a.\b  .Beat Time\fs22\line\b0 @@@\tab\tab = a decimal time concept introduced in 1998 and marketed by the Swatch corporation as an alternative, decimal measure of time. One of the goals was to simplify the way people in different time zones communicate about time, mostly by eliminating time zones altogether. {{\field{\*\fldinst{HYPERLINK "http://en.wikipedia.org/wiki/Swatch_Internet_Time" }}{\fldrslt{\ul\cf1\cf1\ul Wikipedia: Swatch Internet Time}}}}\b\f0\fs22\line\b0 @@@.@\tab = also with first decimal place\line @@@.@@\tab = and with second decimal place\b\par
-Formatting\line\b0\\n\tab  = Newline Character \endash  Inserts a line break to wrap the output as you like.\line\ldblquote\'85\rdblquote\tab  = To prevent a character from triggering its function encase it in \ldblquote quotes\rdblquote\line LDATE = Use the default system configured Long Date format.\line DATE   = Use the default system configured Short Date format.\line TIME    = Use the default system configured Time format.\line JD\tab = \b Julian Date\b0  - The Julian day is used in the Julian date (JD) system of time\line                measurement for scientific use by the astronomy community. Julian date is\line                recommended for astronomical use by the International Astronomical Union.\line OD\tab = \b Ordinal Date\b0  (YYYY-DDD) - Using UTC/GMT/Zulu Time.\line Od\tab = \b Ordinal Date\b0  (YYYY-DDD) - Using Local Time.\line POSIX = \b Posix/Unix Time\b0  is the Number of Seconds that have elapsed since the\line                Unix Epoch Date: 1970-01-01 00:00:00.\b\par
-\fs24 System Uptime \fs22\line\b0 Sd\tab = Number of Days system has been running.\tab (Not compatible with Sa)\line Sa\tab = Total number of hours system has been running.\tab (Not compatible with Sd)\line Sh\tab = Number of hours system has been running.\tab (Not compatible with Sa)\line Sn\tab = Number of minutes system has been running.\line Ss\tab = Number of seconds system has been running.\line ST\tab = Short uptime displayed in h:mm:ss format.\fs20\line\b\fs18 Note:\b0  this function uses GetTickCount() on OS versions before Vista, so any uptime over 49.7 days will (wrap to 0) be inaccurate. Vista+ supports uptime to infinity though.\fs20\line\b\fs18 Note\'b2:\b0  this format additionally supports advanced padding. "S__a" will pad with up to two spaces in case "hours" are less than 100. "S___dd" will pad with up to three spaces and additionally got a zero padded minimum size of two. eg. "   03" for a three hour uptime.\fs22\par
-\page\par
+\pard\sb160\sa60\b\fs24 Month of year\par
+\pard\sa40\b0\fs22
+\b mmmm\b0\tab Month name, long (by locale)\par
+\b mmm\b0\tab Month name, short (by locale)\par
+\b mme\b0\tab Abbreviated month name in English\par
+\b mm\b0\tab Month number, with a leading zero\par
+\b m\b0\tab Month number\par
 
-\pard\widctlpar\sa200\sl276\slmult1\qc\b\fs24 T-Clock Command Line Options\par
+\pard\sb160\sa60\b\fs24 Year\par
+\pard\sa40\b0\fs22
+\b yyyy\b0\tab Year, four digits\par
+\b yy\b0\tab Year, two digits\par
+\b Y\b0\tab Year in the locale calendar (for example the year of the Emperor in Japan)\par
+\b ggg\b0\tab Era name in the locale calendar (for example "Heisei" in Japan)\par
 
-\pard\widctlpar\qc\b0\fs22\lang1031\par
+\pard\sb160\sa60\b\fs24 Week of year\par
+\pard\sa40\b0\fs22
+\b Wi\b0\tab ISO 8601 week number (Europe)\par
+\b Wu\b0\tab U.S. week number, counted from the first day of the year, weeks start on Sunday\par
+\b Ws\b0\tab Week number, weeks start on the first Sunday\par
+\b Wm\b0\tab Week number, weeks start on the first Monday\par
+\b Ww\b0\tab Simple week number (SWN)\par
 
-\pard\widctlpar   \tab\b /exit\tab\tab : \b0 exit T-Clock\par
-  \tab\b /prop\tab\tab : \b0 open T-Clock's properties (options)\par
-  \tab\b /start\tab\tab : \b0 start Stopwatch (open as/if needed)\par
-  \tab\b /stop\tab\tab : \b0 stop the Stopwatch counter (kind of pause)\par
-  \tab\b /reset\tab\tab : \b0 reset Stopwatch to 0 (doesn't stop)\par
-  \tab\b /lap\tab\tab : \b0 record a (the current) Lap Time\par
-  \tab\b /sync\tab\tab : \b0 synchronize the time (UAC elevation required)\par
-  \tab\b /syncopt\tab : \b0 open SNTP / synchronize options, also allows to sync now\par
-  \tab\b /exit-explorer\tab : \b0 tries to exit Explorer gracefully (kills after 15 sec)\par
-  \tab\b /restart-explorer : \b0 like above, but starts it afterwards\par
-  \tab\b /SEH /exit\tab : \b0 unloads "exchndl" exception handler and exits\par
+\pard\sb160\sa60\b\fs24 Day of year\par
+\pard\sa40\b0\fs22
+\b DOY\b0\tab Day of the year, 001 to 366\par
 
-\pard\widctlpar\sa200\sl276\slmult1\b\lang1033\par
-\b0\par
+\pard\sb160\sa60\b\fs24 Time zone name\par
+\pard\sa40\b0\fs22
+\b TZN\b0\tab Name of the Windows time zone configured on this PC\par
+Restart T-Clock after changing the time zone in Windows Date and Time.\par
+This code does not work at the moment. Fixes and suggestions are welcome.\par
 
-\pard\widctlpar\sa200\sl276\slmult1\qc\b\fs24 T-Clock Hotkeys\fs22\par
+\pard\sb280\sa100\b\fs28 Time options\par
 
-\pard\widctlpar\sa200\sl276\slmult1\b0 T-Clock Includes User Configurable Hotkeys to: \line Open the Stopwatch.\line Open Add/Edit Timers.\line Open Properties Dialog.\line Display T-Clock Calendar.\line Open Timer Watch Window.\line\b\fs18 Note: \b0 Timer Watch will auto-close if it isn\rquote t needed (has no timers being watched).\fs22\par
-\page\par
+\pard\sb160\sa60\b\fs24 Hours\par
+\pard\sa40\b0\fs22
+\b hh\b0\tab Hour in 12-hour format, with a leading zero\par
+\b h\b0\tab Hour in 12-hour format\par
+\b HH\b0\tab Hour in 24-hour format, with a leading zero\par
+\b H\b0\tab Hour in 24-hour format\par
+\b w\b0\'b1\b offset\b0\tab Other time zone, 12-hour hour, local time plus or minus the offset\par
+\b W\b0\'b1\b offset\b0\tab Other time zone, 24-hour hour\par
 
-\pard\widctlpar\sa200\sl276\slmult1\qc\b\fs24 How to Use the PC Beep (.pcb) Sound Files\line\b0\fs22 For Those Without Sound Cards\b\par
+The offset is whole hours (\b W+13\b0), hours and minutes (\b W+5:30\b0, \b W-3:30\b0), or decimal hours (\b W+5.5\b0 is 5 hours 30 minutes, \b W+5.75\b0 is 5 hours 45 minutes). \b W+5.30\b0 is 5.30 hours, which is 18 minutes. Use \b W+5:30\b0 or \b W+5.5\b0 for half an hour.\par
 
-\pard\widctlpar\sa200\sl276\slmult1\b0\par
+The code prints that zone's hour. Date and time codes written after it (\b nn\b0, \b ss\b0, \b dd\b0, \b mm\b0, \b yyyy\b0, \b tt\b0, \b dddd\b0, and so on) stay in that zone, so the date changes when the offset crosses midnight. The next \b W\b0 or \b w\b0 offset starts again from local time.\par
 
-\pard\widctlpar\sa200\sl276\slmult1\qj    For those that do not have sound (or just like these tones) T-Clock includes the option to use .pcb files to play a series of tones through the PC\rquote s system speaker. The .pcb files are in a plain text format, and have a straight forward (duration, frequency) simple syntax. So they can be created or edited with any plain text editor (like Notepad).\par
+\b W+5:30:"yyyy-mm-dd HH:nn"\b0 formats only the quoted text in that zone. Use it for a second clock, including a 30-minute or 45-minute zone such as India, Newfoundland, or Nepal.\par
 
-\pard\widctlpar\sa200\sl276\slmult1    There is one demo.pcb file included in the Waves directory. Content of the file with line by line explanation is below: \par
+From UTC-5, \b w+05\b0 is UTC and \b W+10:30:"HH:nn"\b0 is India. \b W+13:"yyyy-mm-dd HH:nn"\b0 is China from US Eastern standard time, and the date moves ahead after 23:00. From UTC+2, \b w-02\b0 is UTC. \b W+5:30:nn\b0 prints the zone hour, then that zone's minutes.\par
 
-\pard\widctlpar\li720\sa200\sl276\slmult1\fs20 100, 400\tab Creates 100ms long 400Hz tone.\line 100, -1\tab\tab 100ms Pause between tones.\line 100, 500 \tab Creates 100ms long 500Hz tone.\line 100, -1\tab\tab 100ms Pause between tones.\line 100, 600 \tab Creates 100ms long 600Hz tone.\line 100, -1\tab\tab 100ms Pause between tones.\line 100, 500 \tab Creates 100ms long 500Hz tone.\line 100, -1\tab\tab 100ms Pause between tones.\line 100, 400 \tab Creates 100ms long 400Hz tone.\line\fs22 500, -1\tab\tab 500ms Pause at end of file for smoother looping.\par
+\pard\sb160\sa60\b\fs24 Minutes\par
+\pard\sa40\b0\fs22
+\b nn\b0\tab Minutes, with a leading zero\par
+\b n\b0\tab Minutes\par
 
-\pard\widctlpar\sa200\sl276\slmult1    The first number (duration) is in milliseconds. It controls how long the tone or pause will be.\par
-   The second number (frequency) is in hertz, and controls the pitch of the tone being played. Valid values are from 37 to 32767.\par
+\pard\sb160\sa60\b\fs24 Seconds\par
+\pard\sa40\b0\fs22
+\b ss\b0\tab Seconds, with a leading zero\par
+\b s\b0\tab Seconds\par
+
+\pard\sb160\sa60\b\fs24 AM/PM\par
+\pard\sa40\b0\fs22
+\b tt\b0\tab AM/PM symbol from T-Clock's time options (\b am/pm\b0 is the same)\par
+
+\pard\sb280\sa100\b\fs28 Other options\par
+
+\pard\sb160\sa60\b\fs24 Swatch Internet Time (.beat time)\par
+\pard\sa40\b0\fs22
+A decimal time from 1998, marketed by Swatch so people in different time zones could name a time without using zones. {\field{\*\fldinst{HYPERLINK "https://en.wikipedia.org/wiki/Swatch_Internet_Time"}}{\fldrslt{\ul\cf1 Wikipedia: Swatch Internet Time}}}\par
+\b @@@\b0\tab Beat time\par
+\b @@@.@\b0\tab Beat time with one decimal place\par
+\b @@@.@@\b0\tab Beat time with two decimal places\par
+
+\pard\sb160\sa60\b\fs24 Formatting\par
+\pard\sa40\b0\fs22
+\b \\n\b0\tab Line break\par
+\b "..."\b0\tab Quotes. Text inside quotes is shown as written and is not read as a format code.\par
+\b LDATE\b0\tab Windows long date\par
+\b DATE\b0\tab Windows short date\par
+\b TIME\b0\tab Windows time\par
+\b JD\b0\tab Julian date, used in astronomy\par
+\b OD\b0\tab Ordinal date (YYYY-DDD) in UTC\par
+\b Od\b0\tab Ordinal date (YYYY-DDD) in local time\par
+\b POSIX\b0\tab POSIX time, seconds since 1970-01-01 00:00:00 UTC\par
+
+\pard\sb160\sa60\b\fs24 System uptime\par
+\pard\sa40\b0\fs22
+\b Sd\b0\tab Days the system has been running. Do not combine with \b Sa\b0.\par
+\b Sa\b0\tab Total hours the system has been running. Do not combine with \b Sd\b0.\par
+\b Sh\b0\tab Hours within the current day. Do not combine with \b Sa\b0.\par
+\b Sn\b0\tab Minutes\par
+\b Ss\b0\tab Seconds\par
+\b ST\b0\tab Short uptime, h:mm:ss\par
+On Windows versions before Vista this uses GetTickCount(), so uptime longer than 49.7 days wraps to 0. Vista and later do not have that limit.\par
+Uptime codes also accept padding. \b S__a\b0 pads with up to two spaces when the hours are below 100. \b S___dd\b0 pads with up to three spaces and keeps at least two digits, so three hours is shown as "   03".\par
+
+\pard\sb280\sa100\b\fs28 Command line\par
+\pard\sa40\b0\fs22
+\b /exit\b0\tab Exit T-Clock\par
+\b /prop\b0\tab Open T-Clock properties\par
+\b /start\b0\tab Start the stopwatch, opening it if needed\par
+\b /stop\b0\tab Pause the stopwatch\par
+\b /reset\b0\tab Reset the stopwatch to 0. This does not stop it.\par
+\b /lap\b0\tab Record the current lap\par
+\b /sync\b0\tab Synchronize the clock. Windows asks for administrator approval.\par
+\b /syncopt\b0\tab Open the time-sync options, which can also sync now\par
+\b /exit-explorer\b0\tab Ask Explorer to exit, and end it after 15 seconds if it is still running\par
+\b /restart-explorer\b0\tab Exit Explorer, then start it again\par
+\b /SEH /exit\b0\tab Unload the exception handler and exit\par
+
+\pard\sb280\sa100\b\fs28 Hotkeys\par
+\pard\sa40\b0\fs22
+T-Clock can assign hotkeys to:\par
+Open the stopwatch.\par
+Open add and edit timers.\par
+Open the properties window.\par
+Show the T-Clock calendar.\par
+Open the timer watch window.\par
+The timer watch closes itself when no timer is being watched.\par
+
+\pard\sb280\sa100\b\fs28 PC beep tones (.pcb)\par
+\pard\sa40\b0\fs22
+T-Clock can play tones through the PC speaker with .pcb files. Use these when there is no sound card, or when you want these tones. A .pcb file is plain text. Each line is a duration and a frequency. Edit it in any text editor, such as Notepad.\par
+One demo.pcb file is in the Waves folder. Its lines mean:\par
+\b 100, 400\b0\tab A 400 Hz tone for 100 ms\par
+\b 100, -1\b0\tab Silence for 100 ms\par
+\b 100, 500\b0\tab A 500 Hz tone for 100 ms\par
+\b 100, -1\b0\tab Silence for 100 ms\par
+\b 100, 600\b0\tab A 600 Hz tone for 100 ms\par
+\b 100, -1\b0\tab Silence for 100 ms\par
+\b 100, 500\b0\tab A 500 Hz tone for 100 ms\par
+\b 100, -1\b0\tab Silence for 100 ms\par
+\b 100, 400\b0\tab A 400 Hz tone for 100 ms\par
+\b 500, -1\b0\tab Silence for 500 ms at the end, so a loop does not click\par
+The first number is the duration in milliseconds. The second number is the pitch in hertz. A pitch of -1 is a pause. Allowed pitches are 37 to 32767.\par
 }
- 
