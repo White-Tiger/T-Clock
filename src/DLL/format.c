@@ -14,8 +14,133 @@ static wchar_t* m_MonthEng[12] = { L"Jan", L"Feb", L"Mar", L"Apr", L"May", L"Jun
 static wchar_t m_AM[10], m_PM[10];
 static wchar_t m_EraStr[11];
 static int m_AltYear;
+static LCID m_locale = LOCALE_USER_DEFAULT;
+static int m_resolve_names = 0; /**< date/time codes use an offset clock, so weekday and month names must follow \c pt */
+static wchar_t m_namebuf[31];
 
 extern char g_bHourZero;
+
+/** Parse \c +13, \c -5:30 or \c +5.5. \c fmt points at the sign. \c .5 is half an hour; \c :30 is thirty minutes. */
+static const wchar_t* ParseZoneOffset(const wchar_t* fmt, LONGLONG* out_minutes)
+{
+	int sign = 1;
+	LONGLONG hours = 0;
+	LONGLONG minutes = 0;
+	
+	if(*fmt == '-')
+		sign = -1;
+	if(*fmt == '+' || *fmt == '-')
+		++fmt;
+	while(*fmt >= '0' && *fmt <= '9') {
+		if(hours < 1000000)
+			hours = hours * 10 + (*fmt - '0');
+		++fmt;
+	}
+	if(*fmt == '.') {
+		LONGLONG frac = 0;
+		LONGLONG scale = 1;
+		++fmt;
+		while(*fmt >= '0' && *fmt <= '9') {
+			if(scale < 1000000) {
+				frac = frac * 10 + (*fmt - '0');
+				scale *= 10;
+			}
+			++fmt;
+		}
+		minutes = (frac * 60 + scale / 2) / scale;
+	} else if(*fmt == ':' && fmt[1] >= '0' && fmt[1] <= '9') {
+		++fmt;
+		while(*fmt >= '0' && *fmt <= '9') {
+			if(minutes < 1000000)
+				minutes = minutes * 10 + (*fmt - '0');
+			++fmt;
+		}
+	}
+	if(out_minutes)
+		*out_minutes = sign * (hours * 60 + minutes);
+	return fmt;
+}
+
+/** Copy a \c :"..." zone format. A doubled quote is a literal quote. */
+static const wchar_t* CopyQuotedFormat(const wchar_t* fmt, wchar_t* dst, size_t dstc)
+{
+	size_t n = 0;
+	
+	if(*fmt == ':')
+		++fmt;
+	if(*fmt == '"')
+		++fmt;
+	for(;;) {
+		if(!*fmt)
+			break;
+		if(*fmt == '"') {
+			if(fmt[1] == '"') {
+				if(n + 1 < dstc)
+					dst[n++] = L'"';
+				fmt += 2;
+				continue;
+			}
+			++fmt;
+			break;
+		}
+		if(n + 1 < dstc)
+			dst[n++] = *fmt;
+		++fmt;
+	}
+	dst[n] = 0;
+	return fmt;
+}
+
+static void AddMinutes(SYSTEMTIME* st, LONGLONG minutes)
+{
+	FILETIME ft;
+	ULARGE_INTEGER ul;
+	SYSTEMTIME shifted;
+	LONGLONG ticks;
+	
+	if(!minutes)
+		return;
+	if(!SystemTimeToFileTime(st, &ft))
+		return;
+	ul.LowPart = ft.dwLowDateTime;
+	ul.HighPart = ft.dwHighDateTime;
+	ticks = (LONGLONG)ul.QuadPart + minutes * 600000000LL; /* 1 minute = 60e7 of 100ns */
+	if(ticks < 0)
+		return;
+	ul.QuadPart = (ULONGLONG)ticks;
+	ft.dwLowDateTime = ul.LowPart;
+	ft.dwHighDateTime = ul.HighPart;
+	if(FileTimeToSystemTime(&ft, &shifted))
+		*st = shifted;
+}
+
+static const wchar_t* ActiveMonthName(const SYSTEMTIME* pt, int long_name)
+{
+	int month;
+	
+	if(!m_resolve_names)
+		return long_name ? m_MonthLong : m_MonthShort;
+	month = (int)pt->wMonth - 1;
+	if(month < 0 || month > 11)
+		return L"";
+	m_namebuf[0] = 0;
+	GetLocaleInfo(m_locale, (long_name ? LOCALE_SMONTHNAME1 : LOCALE_SABBREVMONTHNAME1) + month, m_namebuf, _countof(m_namebuf));
+	return m_namebuf;
+}
+
+static const wchar_t* ActiveDayName(const SYSTEMTIME* pt, int long_name)
+{
+	int loc;
+	
+	if(!m_resolve_names)
+		return long_name ? m_DayOfWeekLong : m_DayOfWeekShort;
+	if(pt->wDayOfWeek > 6)
+		return L"";
+	loc = ((int)pt->wDayOfWeek + 6) % 7; /* LOCALE_SDAYNAME1 is Monday, wDayOfWeek 0 is Sunday */
+	m_namebuf[0] = 0;
+	GetLocaleInfo(m_locale, (long_name ? LOCALE_SDAYNAME1 : LOCALE_SABBREVDAYNAME1) + loc, m_namebuf, _countof(m_namebuf));
+	return m_namebuf;
+}
 
 //================================================================================================
 //---------------------------------//+++--> load Localized Strings for Month, Day, & AM/PM Symbols:
@@ -25,6 +150,7 @@ void InitFormat(const wchar_t* section, SYSTEMTIME* lt)   //--------------------
 	int i, ilang, ioptcal;
 	
 	ilang = api.GetInt(section, L"Locale", GetUserDefaultLangID());
+	m_locale = (LCID)ilang;
 	
 	GetLocaleInfo(ilang, LOCALE_IDEFAULTANSICODEPAGE|LOCALE_RETURN_NUMBER, (wchar_t*)&m_codepage, sizeof(m_codepage));
 	if(!IsValidCodePage(m_codepage)) m_codepage=CP_ACP;
@@ -75,6 +201,13 @@ unsigned MakeFormat(wchar_t buf[FORMAT_MAX_SIZE], const wchar_t* fmt, SYSTEMTIME
 	const wchar_t* pos;
 	wchar_t* out = buf;
 	ULONGLONG TickCount = 0;
+	SYSTEMTIME base_time, work_time;
+	int saved_names;
+	
+	base_time = *pt;
+	work_time = base_time;
+	pt = &work_time;
+	saved_names = m_resolve_names;
 	
 	while(*fmt) {
 		if(*fmt == '"') {
@@ -111,11 +244,12 @@ unsigned MakeFormat(wchar_t buf[FORMAT_MAX_SIZE], const wchar_t* fmt, SYSTEMTIME
 			} else if(fmt[1] == 'm' && fmt[2] == 'm') {
 				if(*(fmt + 3) == 'm') {
 					fmt += 4;
-					for(pos=m_MonthLong; *pos; ) *out++=*pos++;
+					pos = ActiveMonthName(pt, 1);
 				} else {
 					fmt += 3;
-					for(pos=m_MonthShort; *pos; ) *out++=*pos++;
+					pos = ActiveMonthName(pt, 0);
 				}
+				for(; *pos; ) *out++=*pos++;
 			} else {
 				if(fmt[1] == 'm') {
 					fmt += 2;
@@ -131,9 +265,9 @@ unsigned MakeFormat(wchar_t buf[FORMAT_MAX_SIZE], const wchar_t* fmt, SYSTEMTIME
 			fmt += 3;
 			if(*fmt == 'a') {
 				++fmt;
-				pos = m_DayOfWeekLong;
+				pos = ActiveDayName(pt, 1);
 			} else {
-				pos = m_DayOfWeekShort;
+				pos = ActiveDayName(pt, 0);
 			}
 			for(; *pos; *out++ = *pos++);
 		} else if(*fmt=='d') {
@@ -144,9 +278,9 @@ unsigned MakeFormat(wchar_t buf[FORMAT_MAX_SIZE], const wchar_t* fmt, SYSTEMTIME
 				fmt += 3;
 				if(*fmt == 'd'){
 					++fmt;
-					pos = m_DayOfWeekLong;
+					pos = ActiveDayName(pt, 1);
 				}else{
-					pos = m_DayOfWeekShort;
+					pos = ActiveDayName(pt, 0);
 				}
 				for(; *pos; *out++ = *pos++);
 			}else{
@@ -186,24 +320,46 @@ unsigned MakeFormat(wchar_t buf[FORMAT_MAX_SIZE], const wchar_t* fmt, SYSTEMTIME
 			}
 			*out++ = (wchar_t)(pt->wHour % 10) + '0';
 		} else if((*fmt=='w'||*fmt=='W') && (fmt[1]=='+'||fmt[1]=='-')) {
+			// W+13, W-3:30, W+5.5, W+5:30:"yyyy-mm-dd HH:nn"
+			// Bare form prints the zone hour and keeps that clock for later date/time codes.
+			// Quoted form formats only the quoted text in that zone (date rolls across midnight).
 			char is_12h = (*fmt == 'w');
-			char is_negative = (*++fmt == '-');
-			int hour = 0;
-			for(; *++fmt<='9'&&*fmt>='0'; ){
-				hour *= 10;
-				hour += *fmt-'0';
+			LONGLONG delta = 0;
+			SYSTEMTIME zone;
+			
+			++fmt;
+			fmt = ParseZoneOffset(fmt, &delta);
+			zone = base_time;
+			AddMinutes(&zone, delta);
+			if(fmt[0] == ':' && fmt[1] == '"') {
+				wchar_t subfmt[FORMAT_MAX_SIZE];
+				wchar_t subout[FORMAT_MAX_SIZE];
+				unsigned sublen, i;
+				int prev_names = m_resolve_names;
+				
+				fmt = CopyQuotedFormat(fmt, subfmt, _countof(subfmt));
+				m_resolve_names = 1;
+				sublen = MakeFormat(subout, subfmt, &zone, beat100);
+				m_resolve_names = prev_names;
+				if(out < bufend) {
+					if(sublen >= (unsigned)(bufend - out))
+						sublen = (unsigned)(bufend - out) - 1;
+					for(i = 0; i < sublen; ++i)
+						*out++ = subout[i];
+				}
+			} else {
+				int hour = zone.wHour;
+				work_time = zone;
+				m_resolve_names = 1;
+				if(is_12h){
+					while(hour >= 12) // faster than mod 12 if "hour" <= 24
+						hour -= 12;
+					if(!hour && !g_bHourZero)
+						hour = 12;
+				}
+				*out++ = (wchar_t)(hour / 10) + '0';
+				*out++ = (wchar_t)(hour % 10) + '0';
 			}
-			if(is_negative) hour = -hour;
-			hour = (pt->wHour + hour)%24;
-			if(hour < 0) hour += 24;
-			if(is_12h){
-				while(hour >= 12) // faster than mod 12 if "hour" <= 24
-					hour -= 12;
-				if(!hour && !g_bHourZero)
-					hour = 12;
-			}
-			*out++ = (wchar_t)(hour / 10) + '0';
-			*out++ = (wchar_t)(hour % 10) + '0';
 		} else if(*fmt == 'n') {
 			if(fmt[1] == 'n') {
 				fmt += 2;
@@ -513,6 +669,7 @@ unsigned MakeFormat(wchar_t buf[FORMAT_MAX_SIZE], const wchar_t* fmt, SYSTEMTIME
 		}
 	}
 	*out='\0';
+	m_resolve_names = saved_names;
 	return (unsigned)(out-buf);
 }
 __pragma(warning(pop))
@@ -533,6 +690,15 @@ DWORD FindFormat(const wchar_t* fmt)
 				break;
 		}
 		
+		else if((*fmt == 'w' || *fmt == 'W') && (fmt[1] == '+' || fmt[1] == '-')) {
+			++fmt;
+			fmt = ParseZoneOffset(fmt, NULL);
+			if(fmt[0] == ':' && fmt[1] == '"') {
+				wchar_t sub[FORMAT_MAX_SIZE];
+				fmt = CopyQuotedFormat(fmt, sub, _countof(sub));
+				ret |= FindFormat(sub);
+			}
+		}
 		else if(*fmt == 's') {
 			fmt++;
 			ret |= FORMAT_SECOND;
